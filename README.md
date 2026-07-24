@@ -62,3 +62,35 @@ GitHub Actions 자동화. **사용자 맥북과 무관하게 GitHub 서버(클�
 - 첨부파일(.hwp/.pdf/.docx) 본문은 현재 자동 파싱하지 않는다. **메일 본문 텍스트** 기준으로
   생성하며, 첨부에 상세가 있으면 PR 본문에 그 사실을 표기한다. (필요 시 파서 추가 가능)
 - 생성 코드는 "초안"이다. 빌드·테스트는 사람이 PR 에서 확인한다.
+
+## 📁 구조
+
+```
+.
+├── spec_bot.py                    # 메인 파이프라인 (IMAP 탐지 → Claude 코드 생성 → Draft PR)
+│                                  #   SPEC_KEYWORDS / LOOKBACK_DAYS(60일) / PROCESSED_LABEL 상수,
+│                                  #   safe_path() 로 레포 밖 경로 쓰기 차단
+├── scripts/
+│   ├── fetch_specs.py             # 미처리 명세서 메일을 JSON 배열로 출력 (에이전트 루틴용)
+│   └── mark_processed.py          # 처리한 메일에 TeamLex-Processed 라벨 부착
+├── .github/workflows/spec-to-pr.yml  # 매일 KST 09:07 cron + workflow_dispatch, concurrency 로 중복 실행 방지
+├── ROUTINE_PROMPT.md              # 명세서 메일 → Draft PR 을 에이전트 루틴으로 돌릴 때의 실행 지시
+├── ISSUE_ROUTINE_PROMPT.md        # GitHub 이슈 → 코드 수정 → Draft PR 루틴 실행 지시 (라벨 `claude-처리완료`)
+├── HANDOFF.md                     # 맥락 없이 이어받을 수 있게 정리한 인수인계 문서
+└── requirements.txt               # anthropic
+```
+
+`spec_bot.py`(GitHub Actions 경로)와 `scripts/` + `*_ROUTINE_PROMPT.md`(에이전트 루틴 경로)는
+같은 목표를 서로 다른 실행 환경에서 수행하는 두 갈래다. 어느 쪽이든 **결과물은 항상 Draft PR** 이며
+`main` 에 직접 push 하지 않는다.
+
+## 👤 기여도 & 개발 환경
+
+| 항목 | 내용 |
+|---|---|
+| **기여 비율** | **100%** (단독 개발) |
+| **커밋** | 2 / 2 (본인 / 전체 사람 커밋) |
+| **참여 인원** | 1명 |
+| **AI 코딩 도구** | Claude Code |
+
+<sub>기여 비율은 커밋 author 이메일 기준 집계이며 봇·자동화 커밋은 제외했습니다.</sub>
